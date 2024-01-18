@@ -1,0 +1,22 @@
+__pycache__/
+
+# environment file
+config.toml
+!sample_config.toml
+
+# Build folder
+dist/
+
+# file
+.DS_Store
+*.pyc
+*.log
+*.session
+*.session-journal
+*.session-wal
+downloads/
+
+# IDE specific files
+.idea/
+.vscode/
+*.sw*
