@@ -14,6 +14,7 @@ async def get_random_waifu(c):
     char = random.choice(anime['characters'])
     data['char'] = char['name']
     data['image'] = char['image']
+    data['alias'] = char['alias']
     return data
 
 @Mahiru.on_message(filters.group, group=1)
@@ -32,7 +33,7 @@ async def message_watcher(c, m):
             data = await get_random_waifu(c)
             text = await c.tl(m.chat.id, 'new_waifu')
             await c.send_photo(m.chat.id, photo=data['image'], caption=text)
-            await adb.update_one({'chat_id': m.chat.id}, {'$set': {'anime': data['anime'], 'char': data['char']}}, upsert=True)
+            await adb.update_one({'chat_id': m.chat.id}, {'$set': {'anime': data['anime'], 'char': data['char'], 'alias': data["alias"]}}, upsert=True)
             return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': True}})
         return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': check["message_count"]+0}})
     await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 1}})
@@ -48,8 +49,16 @@ async def cmd_protecc(c,m):
     check_waifu = await adb.find_one({'chat_id': m.chat.id})
     waifu = check_waifu['char']
     anime = check_waifu['anime']
+    alias = check_waifu['alias']
     text = m.text.split(None, 1)
+    protecc = False
     if re.search(text[1], waifu, re.IGNORECASE):
+        protecc = True
+    else:
+        for a in alias:
+            if re.search(text[1], a, re.IGNORECASE):
+                protecc = True
+    if protecc:
         await udb.update_one(
             {
                 "$and": [
@@ -94,7 +103,8 @@ async def cmd_add_char(c, m):
                 "$push": {
                     'characters': {
                         'name': line[0],
-                        'image': line[1]
+                        'image': line[1],
+                        'alias': [a for a in line[2].split(",")] if len(line) > 2 else []
                     }
                 }
             },
