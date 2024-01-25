@@ -44,4 +44,7 @@ Memperbaharui daftar admin.
     'refreshing_admin': "Merefresh cache admin...",
     'admin_refreshed': "Cache admin berhasil direfresh.",
     'admin_list_text': "**Daftar Admin di Grup Ini**\n",
+    'new_waifu': "Waifu baru telah muncul!\nTambahkan mereka ke haremmu dengan mengirimkan `/protecc nama karakter .`",
+    'protecc_waifu': "{} ({}) telah ditambahkan ke dalam daftar haremmu!",
+    'protecc_not_waifu': "rip, itu kurang tepat...",
 }

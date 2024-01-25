@@ -45,4 +45,7 @@ Update admin list.
     'user_is_sudo': "User {} is already in the sudo list!",
     'user_is_not_sudo': "User {} is not in the sudo list!",
     'no_sudo': "There is no user in the sudo list!",
+    'new_waifu': "New waifu has been appeared!\nAdd them to your harem by sending /protecc character name.",
+    'protecc_waifu': "{} ({}) has been added to your harem list!",
+    'protecc_not_waifu': "rip, that's not quite right...",
 }
