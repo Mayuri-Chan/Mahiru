@@ -3,6 +3,7 @@ import re
 
 from mahiru import PREFIX
 from mahiru.mahiru import Mahiru
+from mahiru.util.filters import sudo_only
 from pyrogram import filters
 
 async def get_random_waifu(c):
@@ -71,3 +72,33 @@ async def cmd_protecc(c,m):
         await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': False}})
         return await m.reply_text(await c.tl(m.chat.id, 'protecc_waifu').format(waifu, anime))
     await m.reply_text(await c.tl(m.chat.id, 'protecc_not_waifu'))
+
+@Mahiru.on_message(filters.command("addchar", PREFIX) & sudo_only)
+async def cmd_add_char(c, m):
+    db = c.db["char_list"]
+    anime = await m.ask(await c.tl(m.chat.id, 'input_anime'))
+    anime_title = anime.text
+    if re.match(r'^(\/|\$)cancel.*', anime_title):
+        return await m.reply_text(await c.tl(m.chat.id, 'canceled'))
+    char = await m.ask(await c.tl(m.chat.id, 'input_char'))
+    characters = char.text
+    if re.match(r'^(\/|\$)cancel.*', characters):
+        return await m.reply_text(await c.tl(m.chat.id, 'canceled'))
+    i = 0
+    for line in characters.split("\n"):
+        line = line.split(";")
+        await db.update_one(
+            {
+                'title': anime_title
+            }, {
+                "$push": {
+                    'characters': {
+                        'name': line[0],
+                        'image': line[1]
+                    }
+                }
+            },
+            upsert=True
+        )
+        i += 1
+    await m.reply_text((await c.tl(m.chat.id, 'char_added')).format(i, anime_title))

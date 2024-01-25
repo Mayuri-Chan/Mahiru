@@ -47,4 +47,8 @@ Memperbaharui daftar admin.
     'new_waifu': "Waifu baru telah muncul!\nTambahkan mereka ke haremmu dengan mengirimkan `/protecc nama karakter .`",
     'protecc_waifu': "{} ({}) telah ditambahkan ke dalam daftar haremmu!",
     'protecc_not_waifu': "rip, itu kurang tepat...",
+    'input_anime': "Silahkan masukkan judul anime:",
+    'input_char': "Silahkan masukkan nama karakter dan url gambar (dipisahkan dengan titik koma):\nSatu karakter per baris\nContoh:\n`Mayuri;https://example.com/Mayuri.png\n`Kotori;https://example.com/Kotori.png``",
+    'canceled': "Perintah telah dibatalkan.",
+    'char_added': "Berhasil menambahkan {} karakter ke dalam `{}`",
 }

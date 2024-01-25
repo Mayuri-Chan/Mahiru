@@ -48,4 +48,8 @@ Update admin list.
     'new_waifu': "New waifu has been appeared!\nAdd them to your harem by sending /protecc character name.",
     'protecc_waifu': "{} ({}) has been added to your harem list!",
     'protecc_not_waifu': "rip, that's not quite right...",
+    'input_anime': "Please enter the anime title:",
+    'input_char': "Please enter the character name and image url (separated by semicolon):\nOne character per line\nExample:\n`Mayuri;https://example.com/Mayuri.png\n`Kotori;https://example.com/Kotori.png``",
+    'canceled': "Command has been canceled.",
+    'char_added': "Successfully added {} characters to `{}`",
 }
