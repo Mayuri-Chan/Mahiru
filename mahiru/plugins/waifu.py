@@ -232,8 +232,10 @@ async def cmd_exportall(c,m):
     list_anime = []
     async for d in data:
         d.pop('_id')
+        d["characters"] = sorted(d["characters"], key=lambda k: (k['name']))
         list_anime.append(d)
-    json_data = json_util.dumps({'list': list_anime}, indent=4)
+    sorted_list = sorted(list_anime, key=lambda k: (k['title']))
+    json_data = json_util.dumps({'list': sorted_list}, indent=4)
     now = datetime.now()
     now_formatted = now.strftime("%Y%m%d-%H:%M:%S")
     filename = f"backup-anime-{now_formatted}.json"
