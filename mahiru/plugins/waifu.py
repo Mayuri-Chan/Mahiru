@@ -65,6 +65,31 @@ async def cmd_protecc(c,m):
             if (text[1]).lower() in a.lower():
                 protecc = True
     if protecc:
+        count = 0
+        check_user_waifu = await udb.find_one({'user_id': m.from_user.id, 'chat_id': m.chat.id})
+        if check_user_waifu:
+            waifu_list = check_user_waifu['harem']
+            exists = [x for x in waifu_list if x["anime"]==anime and x["characters"]==waifu]
+            if len(exists) > 0:
+                count = exists[0]['count']
+                await udb.update_one(
+                    {
+                        "$and": [
+                            {
+                                'user_id': m.from_user.id
+                            },{
+                                'chat_id': m.chat.id
+                            }
+                        ]
+                    }, {
+                        '$pull': {
+                            'harem': {
+                                'anime': anime,
+                                'characters': waifu
+                            }
+                        }
+                    }
+                )
         await udb.update_one(
             {
                 "$and": [
@@ -78,7 +103,8 @@ async def cmd_protecc(c,m):
                 '$push': {
                     'harem': {
                         'anime': anime,
-                        'characters': waifu
+                        'characters': waifu,
+                        'count': count+1
                     }
                 }
             },
@@ -164,7 +190,7 @@ async def get_waifu_list(c, m, page: int=1):
             if previos_anime != sorted_list[i]['anime']:
                 previos_anime = sorted_list[i]['anime']
                 text += "\n\n" + sorted_list[i]['anime']
-            text += f"\n{i+1}." + sorted_list[i]["characters"]
+            text += f"\n{i+1}." + sorted_list[i]["characters"] + f" ({sorted_list[i]['count']})" if sorted_list[i]['count'] > 1 else f"\n{i+1}." + sorted_list[i]["characters"]
     text += f"\n\n{(await c.tl(chat_id, 'user_harem_percentage')).format(uwc,bwc,uwp,uac,bac,uap)}"
     return text, page, page_count
 
