@@ -11,6 +11,7 @@ from mahiru import config, init_help
 from mahiru.plugins import list_all_plugins
 from mahiru.util.filters import admin_check
 from pyrogram import Client, raw
+from pyrogram.errors import FloodWait, ChannelPrivate
 
 logging.getLogger().handlers.clear()
 log = logging.getLogger("Mahiru")
