@@ -182,14 +182,14 @@ async def create_button(c, page, page_count, chat_id, user_id):
             button.append(
                 InlineKeyboardButton(
                     text=f"⏪ {page-1}",
-                    callback_data=f"h_{user_id}_{page}"
+                    callback_data=f"h_{user_id}_{page-1}"
                 )
             )
         if page < page_count:
             button.append(
                 InlineKeyboardButton(
                     text=f"{page+1} ⏩",
-                    callback_data=f"h_{user_id}_{page+2}"
+                    callback_data=f"h_{user_id}_{page+1}"
                 )
             )
         if page < page_count-1:
@@ -221,7 +221,7 @@ async def harem_page(c, q):
     chat_id = m.chat.id
     user_id = int(q.matches[0].group(1))
     page = int(q.matches[0].group(2))
-    check, page, page_count = await get_waifu_list(c, m, page)
+    check, page, page_count = await get_waifu_list(c, m.reply_to_message, page)
     button = await create_button(c, page, page_count, chat_id, user_id)
     await m.edit_text(check, reply_markup=button)
 
