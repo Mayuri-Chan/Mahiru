@@ -51,4 +51,11 @@ Memperbaharui daftar admin.
     'input_char': "Silahkan masukkan nama karakter, url gambar (dipisahkan dengan titik koma) dan alias (dipisahkan dengan koma):\nSatu karakter per baris\nContoh:\n`Mayuri;https://example.com/Mayuri.png\n`Kotori Itsuka;https://example.com/Kotori.png;Efreet,Koto-chan``",
     'canceled': "Perintah telah dibatalkan.",
     'char_added': "Berhasil menambahkan {} karakter ke dalam `{}`",
+    'user_harem': "Harem {} di {}:",
+    'user_harem_with_page': "Harem {} di {} (halaman {}):",
+    'user_harem_percentage': "{} dari {} ({}%) waifu ditemukan\n{} dari {} ({}%) anime ditemukan",
+    'first_page': "Pertama ⏮",
+    'last_page': "Terakhir ⏭",
+    'protecc_waifu_none': "{} belum memiliki waifu di {}!",
+    'not_your_harem': "Itu bukan harem kamu!",
 }

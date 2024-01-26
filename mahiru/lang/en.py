@@ -52,4 +52,11 @@ Update admin list.
     'input_char': "Please enter the character name, image url (separated by semicolon) and aliases (separated by comma):\nOne character per line\nExample:\n`Mayuri;https://example.com/Mayuri.png\n`Kotori Itsuka;https://example.com/Kotori.png;Efreet,Koto-chan``",
     'canceled': "Command has been canceled.",
     'char_added': "Successfully added {} characters to `{}`",
+    'user_harem': "{}'s harem in {}:",
+    'user_harem_with_page': "{}'s harem in {} (page {}):",
+    'user_harem_percentage': "{} of {} ({}%) waifus founds\n{} of {} ({}%) animes founds",
+    'first_page': "First ⏮",
+    'last_page': "Last ⏭",
+    'protecc_waifu_none': "{} don't have any waifus yet in {}!",
+    'not_your_harem': "That's not your harem!",
 }

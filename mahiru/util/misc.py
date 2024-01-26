@@ -78,3 +78,10 @@ def humanbytes(size: float) -> str:
         size /= power
         t_n += 1
     return "{:.2f} {}B".format(size, power_dict[t_n])  # pylint: disable=consider-using-f-string
+
+def removeduplicate(it):
+    seen = []
+    for x in it:
+        if x not in seen:
+            yield x
+            seen.append(x)
