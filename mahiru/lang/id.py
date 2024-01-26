@@ -58,4 +58,7 @@ Memperbaharui daftar admin.
     'last_page': "Terakhir ⏭",
     'protecc_waifu_none': "{} belum memiliki waifu di {}!",
     'not_your_harem': "Itu bukan harem kamu!",
+    'reply_to_message_with_document': "Balas ke pesan dengan dokumen untuk mengimpor data.",
+    'reply_to_message_with_json': "Balas ke pesan yang mengandung dokumen json untuk mengimpor data.",
+    'data_imported': "Data berhasil diimpor!",
 }

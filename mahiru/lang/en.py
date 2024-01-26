@@ -59,4 +59,7 @@ Update admin list.
     'last_page': "Last ⏭",
     'protecc_waifu_none': "{} don't have any waifus yet in {}!",
     'not_your_harem': "That's not your harem!",
+    'reply_to_message_with_document': "Reply to a message with a document to import data.",
+    'reply_to_message_with_json': "Reply to a message with a json file to import data.",
+    'data_imported': "Data successfully imported!",
 }

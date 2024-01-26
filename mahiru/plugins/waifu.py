@@ -1,7 +1,10 @@
+import io
 import math
 import random
 import re
 
+from bson import json_util
+from datetime import datetime
 from mahiru import PREFIX
 from mahiru.mahiru import Mahiru
 from mahiru.util.filters import sudo_only
@@ -221,3 +224,75 @@ async def harem_page(c, q):
     check, page, page_count = await get_waifu_list(c, m, page)
     button = await create_button(c, page, page_count, chat_id, user_id)
     await m.edit_text(check, reply_markup=button)
+
+@Mahiru.on_message(filters.command("exportall", PREFIX) & sudo_only)
+async def cmd_exportall(c,m):
+    db = c.db['char_list']
+    data = db.find()
+    list_anime = []
+    async for d in data:
+        d.pop('_id')
+        list_anime.append(d)
+    json_data = json_util.dumps({'list': list_anime}, indent=4)
+    now = datetime.now()
+    now_formatted = now.strftime("%Y%m%d-%H:%M:%S")
+    filename = f"backup-anime-{now_formatted}.json"
+    f = io.BytesIO(json_data.encode('utf8'))
+    f.name = filename
+    await m.reply_document(document=f)
+
+@Mahiru.on_message(filters.command("importall", PREFIX) & sudo_only)
+async def cmd_importall(c,m):
+    db = c.db['char_list']
+    if not m.reply_to_message:
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_with_document'))
+    if not m.reply_to_message.document:
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_with_document'))
+    if not m.reply_to_message.document.file_name.endswith(".json"):
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_with_json'))
+    data = await m.reply_to_message.download()
+    with open(data, 'r') as f:
+        data = json_util.loads(f.read())
+    list_anime = data['list']
+    i = 0
+    for anime in list_anime:
+        check = await db.find_one({'title': anime['title']})
+        if check:
+            for char in anime['characters']:
+                char_exist = False
+                for char2 in check['characters']:
+                    if char['name'] == char2['name']:
+                        char_exist = char2
+                        break
+                if check and char_exist:
+                    await db.update_one(
+                        {
+                            'title': anime['title']
+                        }, {
+                            "$pull": {
+                                'characters': {
+                                    'name': char_exist['name'],
+                                    'image': char_exist['image'],
+                                    'alias': char_exist['alias']
+                                }
+                            }
+                        }
+                    )
+                await db.update_one(
+                    {
+                        'title': anime['title']
+                    }, {
+                        "$push": {
+                            'characters': {
+                                'name': char['name'],
+                                'image': char['image'],
+                                'alias': char['alias']
+                            }
+                        }
+                    },
+                    upsert=True
+                )
+        else:
+            await db.insert_one(anime)
+        i += 1
+    await m.reply_text((await c.tl(m.chat.id, 'data_imported')).format(i))
