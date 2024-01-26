@@ -12,7 +12,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 async def get_random_waifu(c):
     db = c.db['char_list']
     data = {}
-    anime = db.aggregate([{ "$sample": { 'size': 1 } }]).next()
+    anime = await db.aggregate([{ "$sample": { 'size': 1 } }]).next()
     data['anime'] = anime['title']
     char = random.choice(anime['characters'])
     data['char'] = char['name']
@@ -20,14 +20,14 @@ async def get_random_waifu(c):
     data['alias'] = char['alias']
     return data
 
-@Mahiru.on_message(filters.group, group=1)
+@Mahiru.on_message(filters.group, group=11)
 async def message_watcher(c, m):
     db = c.db["chat_waifu"]
     adb = c.db["active_waifu"]
     check = await db.find_one({'chat_id': m.chat.id})
     if check:
         if check['active'] == True:
-            if m.command[0] == "protecc":
+            if m.command and m.command[0] == "protecc":
                 return
             if check['message_count'] >= 10:
                 return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': False}})
@@ -38,8 +38,8 @@ async def message_watcher(c, m):
             await c.send_photo(m.chat.id, photo=data['image'], caption=text)
             await adb.update_one({'chat_id': m.chat.id}, {'$set': {'anime': data['anime'], 'char': data['char'], 'alias': data["alias"]}}, upsert=True)
             return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': True}})
-        return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': check["message_count"]+0}})
-    await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 1}})
+        return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': check["message_count"]+1}})
+    await db.update_one({'chat_id': m.chat.id}, {"$set": {'message_count': 1, 'active': False}}, upsert=True)
 
 @Mahiru.on_message(filters.group & filters.command("protecc", PREFIX))
 async def cmd_protecc(c,m):
@@ -55,11 +55,11 @@ async def cmd_protecc(c,m):
     alias = check_waifu['alias']
     text = m.text.split(None, 1)
     protecc = False
-    if re.search(text[1], waifu, re.IGNORECASE):
+    if (text[1]).lower() in waifu.lower():
         protecc = True
     else:
         for a in alias:
-            if re.search(text[1], a, re.IGNORECASE):
+            if (text[1]).lower() in a.lower():
                 protecc = True
     if protecc:
         await udb.update_one(
@@ -82,7 +82,7 @@ async def cmd_protecc(c,m):
             upsert=True
         )
         await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': False}})
-        return await m.reply_text(await c.tl(m.chat.id, 'protecc_waifu').format(waifu, anime))
+        return await m.reply_text((await c.tl(m.chat.id, 'protecc_waifu')).format(waifu, anime))
     await m.reply_text(await c.tl(m.chat.id, 'protecc_not_waifu'))
 
 @Mahiru.on_message(filters.command("addchar", PREFIX) & sudo_only)
@@ -121,13 +121,13 @@ async def get_sorted_waifu_list(c, chat_id, user_id):
     check = await db.find_one({'user_id': user_id, 'chat_id': chat_id})
     if not check:
         return None
-    sorted_list = sorted(check['harem'], key=lambda k: (k['anime'],k["character"]))
+    sorted_list = sorted(check['harem'], key=lambda k: (k['anime'],k["characters"]))
     return sorted_list
 
 async def get_percentage(c, user_waifu_list):
     db = c.db["char_list"]
-    user_waifu_count = len(removeduplicate(user_waifu_list))
-    user_anime_count = len(removeduplicate([a['anime'] for a in user_waifu_list]))
+    user_waifu_count = len([waifu for waifu in removeduplicate(user_waifu_list)])
+    user_anime_count = len([anime for anime in removeduplicate([a['anime'] for a in user_waifu_list])])
     bot_waifu_count = sum([len(a['characters']) async for a in db.find()])
     bot_anime_count = await db.count_documents({})
     user_waifu_percentage = round((user_waifu_count / bot_waifu_count) * 100, 2)
@@ -161,8 +161,8 @@ async def get_waifu_list(c, m, page: int=1):
             if previos_anime != sorted_list[i]['anime']:
                 previos_anime = sorted_list[i]['anime']
                 text += "\n\n" + sorted_list[i]['anime']
-            text += f"\n{i+1}." + sorted_list[i]["character"]
-    text += f"\n\n{await c.tl(chat_id, 'user_harem_percentage').format(uwc,bwc,uwp,uac,bac,uap)}"
+            text += f"\n{i+1}." + sorted_list[i]["characters"]
+    text += f"\n\n{(await c.tl(chat_id, 'user_harem_percentage')).format(uwc,bwc,uwp,uac,bac,uap)}"
     return text, page, page_count
 
 async def create_button(c, page, page_count, chat_id, user_id):
