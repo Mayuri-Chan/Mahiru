@@ -13,6 +13,9 @@ from mahiru.util.misc import removeduplicate
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+__PLUGIN__ = "waifu"
+__HELP__ = "waifu_help"
+
 async def get_random_waifu(c):
     db = c.db['char_list']
     data = {}

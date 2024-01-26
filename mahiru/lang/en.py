@@ -73,4 +73,20 @@ Update admin list.
     'trade_accepted': "Trade accepted!\nYou give {} and {} give you {}",
     'not_your_trade': "That's not your trade!",
     'trade_declined': "Trade declined!",
+    'waifu': "Waifu",
+    'waifu_help': """
+[Waifu]
+Waifu catcher module.
+add waifu to your harem and trade with other users.
+to use just add this bot to your group.
+
+> `/harem`
+Get your harem list.
+
+> `/protecc <character name>`
+Add a character to your harem.
+
+> `/trade <your waifu number> <their waifu number>`
+Trade waifus with other users.
+    """
 }

@@ -72,4 +72,20 @@ Memperbaharui daftar admin.
     'trade_accepted': "Permintaan tukar telah diterima!\nKamu memberi {} dan {} memberimu {}",
     'not_your_trade': "Itu bukan tukaranmu!",
     'trade_declined': "Permintaan tukar telah ditolak!",
+    'waifu': "Waifu",
+    'waifu_help': """
+[Waifu]
+Module untuk menangkap waifu.
+Tambahkan waifu ke dalam harem dan tukar dengan pengguna lain.
+Untuk menggunakan fitur ini tinggal tambahkan bot ke dalam grupmu.
+
+> `/harem`
+Melihat daftar waifu yang kamu miliki.
+
+> `/protecc <nama karakter>`
+Menambahkan karakter ke dalam daftar waifumu.
+
+> `/trade <nomor waifumu> <nomor waifunya>`
+Menukar waifu dengan pengguna lain.
+    """,
 }
