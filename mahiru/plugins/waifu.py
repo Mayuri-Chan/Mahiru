@@ -142,7 +142,7 @@ async def get_waifu_list(c, m, page: int=1):
     user_id = m.from_user.id
     sorted_list = await get_sorted_waifu_list(c, chat_id, user_id)
     if sorted_list is None:
-        return None
+        return None, None, None
     uwp, uap, uwc, uac, bwc, bac = await get_percentage(c, sorted_list)
     limit = 10
     offset = (page - 1) * limit
