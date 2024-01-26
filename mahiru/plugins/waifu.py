@@ -2,6 +2,7 @@ import io
 import math
 import random
 import re
+import uuid
 
 from bson import json_util
 from datetime import datetime
@@ -324,3 +325,323 @@ async def cmd_importall(c,m):
             await db.insert_one(anime)
         i += 1
     await m.reply_text((await c.tl(m.chat.id, 'data_imported')).format(i))
+
+@Mahiru.on_message(filters.group & filters.command("trade", PREFIX))
+async def cmd_trade(c,m):
+    if not m.reply_to_message:
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_trade'))
+    if not m.reply_to_message.from_user:
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_trade'))
+    if m.reply_to_message.from_user.id == m.from_user.id:
+        return await m.reply_text(await c.tl(m.chat.id, 'trade_self'))
+    db = c.db["user_waifu"]
+    tdb = c.db["trade_waifu"]
+    user_id = m.from_user.id
+    chat_id = m.chat.id
+    target_id = m.reply_to_message.from_user.id
+    user_harem = await get_sorted_waifu_list(c, chat_id, user_id)
+    target_harem = await get_sorted_waifu_list(c, chat_id, target_id)
+    text = (m.text).split()
+    if len(text) < 3:
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_trade'))
+    if not text[1].isdigit() or not text[2].isdigit():
+        return await m.reply_text(await c.tl(m.chat.id, 'reply_to_message_trade'))
+    user_waifu = int(text[1])
+    target_waifu = int(text[2])
+    if user_waifu > len(user_harem):
+        return await m.reply_text((await c.tl(m.chat.id, 'your_waifu_not_found')).format(user_waifu))
+    if target_waifu > len(target_harem):
+        return await m.reply_text((await c.tl(m.chat.id, 'target_waifu_not_found')).format(target_waifu))
+    user_waifu_name = user_harem[user_waifu-1]['characters']
+    user_waifu_anime = user_harem[user_waifu-1]['anime']
+    target_waifu_name = target_harem[target_waifu-1]['characters']
+    target_waifu_anime = target_harem[target_waifu-1]['anime']
+    trade_id = str(uuid.uuid4()).split("-")[0].lower()
+    await tdb.update_one(
+        {
+            "trade_id": trade_id
+        }, {
+            '$set': {
+                'user_id': user_id,
+                'target_id': target_id,
+                'user_waifu': {
+                    'anime': user_waifu_anime,
+                    'characters': user_waifu_name
+                },
+                'target_waifu': {
+                    'anime': target_waifu_anime,
+                    'characters': target_waifu_name
+                }
+            }
+        },
+        upsert=True
+    )
+    button = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    text=await c.tl(m.chat.id, 'accept_trade'),
+                    callback_data=f"trade_accept_{trade_id}"
+                ),
+                InlineKeyboardButton(
+                    text=await c.tl(m.chat.id, 'decline_trade'),
+                    callback_data=f"trade_decline_{trade_id}"
+                )
+            ]
+        ]
+    )
+    text = (await c.tl(m.chat.id, 'trade_request')).format(m.from_user.mention, target_waifu_name, target_waifu_anime, user_waifu_name, user_waifu_anime)
+    await m.reply_to_message.reply_text(text, reply_markup=button)
+
+@Mahiru.on_callback_query(filters.regex(r"^trade_accept_(.*)"))
+async def accept_trade(c,q):
+    trade_id = q.matches[0].group(1)
+    db = c.db["trade_waifu"]
+    tdb = c.db["user_waifu"]
+    trade_data = await db.find_one({'trade_id': trade_id})
+    if not trade_data:
+        return await q.answer((await c.tl(q.message.chat.id, 'trade_not_found')).format(trade_id))
+    user_id = trade_data['user_id']
+    target_user_id = trade_data['target_id']
+    if q.from_user.id != target_user_id:
+        return await q.answer((await c.tl(q.message.chat.id, 'not_your_trade')))
+    user_waifu = trade_data['user_waifu']
+    target_waifu = trade_data['target_waifu']
+    user = await c.get_users(user_id)
+    user_waifu_data = await tdb.find_one({'user_id': user_id, 'chat_id': q.message.chat.id})
+    target_waifu_data = await tdb.find_one({'user_id': target_user_id, 'chat_id': q.message.chat.id})
+    find_user_waifu = [x for x in user_waifu_data["harem"] if x["anime"]==user_waifu["anime"] and x["characters"]==user_waifu["characters"]]
+    find_target_waifu = [x for x in target_waifu_data["harem"] if x["anime"]==target_waifu["anime"] and x["characters"]==target_waifu["characters"]]
+    if find_user_waifu[0]['count'] > 1:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$pull': {
+                    'harem': {
+                        'anime': user_waifu['anime'],
+                        'characters': user_waifu['characters']
+                    }
+                }
+            }
+        )
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$push': {
+                    'harem': {
+                        'anime': user_waifu['anime'],
+                        'characters': user_waifu['characters'],
+                        'count': find_user_waifu[0]['count']-1
+                    }
+                }
+            },
+            upsert=True
+        )
+    else:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$pull': {
+                    'harem': {
+                        'anime': user_waifu['anime'],
+                        'characters': user_waifu['characters']
+                    }
+                }
+            }
+        )
+    if find_target_waifu[0]['count'] > 1:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': target_user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$pull': {
+                    'harem': {
+                        'anime': target_waifu['anime'],
+                        'characters': target_waifu['characters']
+                    }
+                }
+            }
+        )
+    else:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': target_user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$pull': {
+                    'harem': {
+                        'anime': target_waifu['anime'],
+                        'characters': target_waifu['characters']
+                    }
+                }
+            }
+        )
+    user_waifu_exist = [x for x in user_waifu_data["harem"] if x["anime"]==target_waifu["anime"] and x["characters"]==target_waifu["characters"]]
+    if len(user_waifu_exist) > 0:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$pull': {
+                    'harem': {
+                        'anime': target_waifu['anime'],
+                        'characters': target_waifu['characters']
+                    }
+                }
+            }
+        )
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$push': {
+                    'harem': {
+                        'anime': target_waifu['anime'],
+                        'characters': target_waifu['characters'],
+                        'count': user_waifu_exist[0]['count']+1
+                    }
+                }
+            },
+            upsert=True
+        )
+    else:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$push': {
+                    'harem': {
+                        'anime': target_waifu['anime'],
+                        'characters': target_waifu['characters'],
+                        'count': 1
+                    }
+                }
+            },
+            upsert=True
+        )
+    target_waifu_exist = [x for x in target_waifu_data["harem"] if x["anime"]==user_waifu["anime"] and x["characters"]==user_waifu["characters"]]
+    if len(target_waifu_exist) > 0:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': target_user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$pull': {
+                    'harem': {
+                        'anime': user_waifu['anime'],
+                        'characters': user_waifu['characters']
+                    }
+                }
+            }
+        )
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': target_user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$push': {
+                    'harem': {
+                        'anime': user_waifu['anime'],
+                        'characters': user_waifu['characters'],
+                        'count': target_waifu_exist[0]['count']+1
+                    }
+                }
+            },
+            upsert=True
+        )
+    else:
+        await tdb.update_one(
+            {
+                "$and": [
+                    {
+                        'user_id': target_user_id
+                    },{
+                        'chat_id': q.message.chat.id
+                    }
+                ]
+            }, {
+                '$push': {
+                    'harem': {
+                        'anime': user_waifu['anime'],
+                        'characters': user_waifu['characters'],
+                        'count': 1
+                    }
+                }
+            },
+            upsert=True
+        )
+    await db.delete_one({'trade_id': trade_id})
+    await q.message.edit_text((await c.tl(q.message.chat.id, 'trade_accepted')).format(target_waifu['characters'], user.mention, user_waifu['characters']))
+
+@Mahiru.on_callback_query(filters.regex(r"^trade_decline_(.*)"))
+async def decline_trade(c,q):
+    trade_id = q.matches[0].group(1)
+    db = c.db["trade_waifu"]
+    trade_data = await db.find_one({'trade_id': trade_id})
+    if not trade_data:
+        return await q.answer((await c.tl(q.message.chat.id, 'trade_not_found')))
+    target_user_id = trade_data['target_id']
+    if q.from_user.id != target_user_id:
+        return await q.answer((await c.tl(q.message.chat.id, 'not_your_trade')))
+    await db.delete_one({'trade_id': trade_id})
+    await q.message.edit_text((await c.tl(q.message.chat.id, 'trade_declined')))
