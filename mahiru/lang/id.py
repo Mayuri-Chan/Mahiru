@@ -46,6 +46,7 @@ Memperbaharui daftar admin.
     'admin_list_text': "**Daftar Admin di Grup Ini**\n",
     'new_waifu': "Waifu baru telah muncul!\nTambahkan mereka ke haremmu dengan mengirimkan `/protecc nama karakter .`",
     'protecc_waifu': "{} ({}) telah ditambahkan ke dalam daftar haremmu!",
+    'waifu_running': 'rip, waifu telah kabur...',
     'protecc_not_waifu': "rip, itu kurang tepat...",
     'input_anime': "Silahkan masukkan judul anime:",
     'input_char': "Silahkan masukkan nama karakter, url gambar (dipisahkan dengan titik koma) dan alias (dipisahkan dengan koma):\nSatu karakter per baris\nContoh:\n`Mayuri;https://example.com/Mayuri.png\n`Kotori Itsuka;https://example.com/Kotori.png;Efreet,Koto-chan``",

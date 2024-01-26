@@ -1,3 +1,4 @@
+import asyncio
 import colorlog
 import importlib
 import logging
@@ -7,10 +8,11 @@ from async_pymongo import AsyncClient
 from apscheduler import RunState
 from apscheduler.schedulers.async_ import AsyncScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from mahiru import config, init_help
 from mahiru.plugins import list_all_plugins
 from mahiru.util.filters import admin_check
-from pyrogram import Client, raw
+from pyrogram import Client, enums, raw
 from pyrogram.errors import FloodWait, ChannelPrivate
 
 logging.getLogger().handlers.clear()
@@ -157,6 +159,7 @@ class Mahiru(Client):
         if self.scheduler.state == RunState.stopped:
             # run every 2 hours
             await self.scheduler.add_schedule(self.adminlist_watcher, CronTrigger(hour=0))
+            await self.scheduler.add_schedule(self.timeout_watcher, IntervalTrigger(seconds=60*15))
             # Run the scheduler in background
             await self.scheduler.start_in_background()
 
@@ -209,6 +212,27 @@ class Mahiru(Client):
                 else:
                     await db.update_one({'chat_id': chat_id},{"$push": {'list': user_id}}, upsert=True)
                     second_loop = True
+
+    async def timeout_watcher(self):
+        db = self.db["active_waifu"]
+        cdb = self.db["chat_waifu"]
+        data = db.find()
+        try:
+            await data.next()
+        except StopAsyncIteration:
+            return
+        else:
+            async for waifu in data:
+                if waifu["timeout"] < time.time():
+                    await cdb.update_one({'chat_id': waifu["chat_id"]}, {"$set": {'message_count': 0, 'active': False}})
+                    await db.delete_one({'_id': waifu['_id']})
+                    try:
+                        await self.send_message(waifu["chat_id"], self.tl(waifu["chat_id"], "waifu_running"))
+                    except FloodWait as e:
+                        await asyncio.sleep(e.value)
+                    except Exception as e:
+                        self.log.warning(e)
+                        continue
 
     def redact_message(self, text):
         api_id = str(self.config['telegram']['API_ID'])

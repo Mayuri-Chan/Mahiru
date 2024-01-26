@@ -47,6 +47,7 @@ Update admin list.
     'no_sudo': "There is no user in the sudo list!",
     'new_waifu': "New waifu has been appeared!\nAdd them to your harem by sending /protecc character name.",
     'protecc_waifu': "{} ({}) has been added to your harem list!",
+    'waifu_running': "rip, the waifu has run away already...",
     'protecc_not_waifu': "rip, that's not quite right...",
     'input_anime': "Please enter the anime title:",
     'input_char': "Please enter the character name, image url (separated by semicolon) and aliases (separated by comma):\nOne character per line\nExample:\n`Mayuri;https://example.com/Mayuri.png\n`Kotori Itsuka;https://example.com/Kotori.png;Efreet,Koto-chan``",

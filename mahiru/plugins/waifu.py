@@ -12,6 +12,7 @@ from mahiru.util.filters import sudo_only
 from mahiru.util.misc import removeduplicate
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from time import time
 
 __PLUGIN__ = "waifu"
 __HELP__ = "waifu_help"
@@ -32,18 +33,22 @@ async def message_watcher(c, m):
     db = c.db["chat_waifu"]
     adb = c.db["active_waifu"]
     check = await db.find_one({'chat_id': m.chat.id})
+    check_active = await adb.find_one({'chat_id': m.chat.id})
     if check:
         if check['active'] == True:
             if m.command and m.command[0] == "protecc":
                 return
-            if check['message_count'] >= 10:
+            if check['message_count'] >= 10 or check_active['timeout'] < time():
+                await c.send_message(m.chat.id, await c.tl(m.chat.id, 'waifu_running'))
+                await adb.delete_one({'chat_id': m.chat.id})
                 return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': False}})
             return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': check["message_count"]+1}})
         if check["message_count"] >= 50:
             data = await get_random_waifu(c)
             text = await c.tl(m.chat.id, 'new_waifu')
             await c.send_photo(m.chat.id, photo=data['image'], caption=text)
-            await adb.update_one({'chat_id': m.chat.id}, {'$set': {'anime': data['anime'], 'char': data['char'], 'alias': data["alias"]}}, upsert=True)
+            timeout = time() + (60*5) # 5 minutes
+            await adb.update_one({'chat_id': m.chat.id}, {'$set': {'anime': data['anime'], 'char': data['char'], 'alias': data["alias"], 'timeout': timeout}}, upsert=True)
             return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': True}})
         return await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': check["message_count"]+1}})
     await db.update_one({'chat_id': m.chat.id}, {"$set": {'message_count': 1, 'active': False}}, upsert=True)
@@ -115,6 +120,7 @@ async def cmd_protecc(c,m):
             upsert=True
         )
         await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': False}})
+        await adb.delete_one({'chat_id': m.chat.id})
         return await m.reply_text((await c.tl(m.chat.id, 'protecc_waifu')).format(waifu, anime))
     await m.reply_text(await c.tl(m.chat.id, 'protecc_not_waifu'))
 
