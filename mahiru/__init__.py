@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 try:
     import tomllib
@@ -7,11 +8,11 @@ except ImportError:
 
 from importlib import import_module
 
-config_path = "config.toml"
-if not os.path.isfile(config_path):
+config_path = Path("config.toml")
+if not config_path.exists():
     config = None
 else:
-    with open(config_path, 'rb') as f:
+    with config_path.open(mode="rb") as f:
         config = tomllib.load(f)
     PREFIX = config['bot']['PREFIX']
 

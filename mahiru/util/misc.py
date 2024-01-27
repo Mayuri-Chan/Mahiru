@@ -1,5 +1,3 @@
-import re
-from pyrogram import emoji
 from pyrogram.types import InlineKeyboardButton
 
 _EMOJI_REGEXP = None
@@ -37,47 +35,6 @@ async def paginate_plugins(client, _page_n, plugin_dict, prefix, chat_id, chat=N
         pairs.append((plugins[-1],))
 
     return pairs
-
-def get_emoji_regex():
-    global _EMOJI_REGEXP
-    if not _EMOJI_REGEXP:
-        e_list = [
-            getattr(emoji, e).encode("unicode-escape").decode("ASCII")
-            #getattr(emoji, e)
-            for e in dir(emoji)
-            if not e.startswith("_")
-        ]
-        # to avoid re.error excluding char that start with '*'
-        e_sort = sorted([x for x in e_list if not x.startswith("*")], reverse=True)
-        # Sort emojis by length to make sure multi-character emojis are
-        # matched first
-        pattern_ = f"({'|'.join(e_sort)})"
-        _EMOJI_REGEXP = re.compile(pattern_)
-    return _EMOJI_REGEXP
-
-
-EMOJI_PATTERN = get_emoji_regex()
-
-def humanbytes(size: float) -> str:
-    """ humanize size """
-    if not size:
-        return "0 B"
-    power = 1024
-    t_n = 0
-    power_dict = {
-        0: '',
-        1: 'Ki',
-        2: 'Mi',
-        3: 'Gi',
-        4: 'Ti',
-        5: 'Pi',
-        6: 'Ei',
-        7: 'Zi',
-        8: 'Yi'}
-    while size > power:
-        size /= power
-        t_n += 1
-    return "{:.2f} {}B".format(size, power_dict[t_n])  # pylint: disable=consider-using-f-string
 
 def removeduplicate(it):
     seen = []

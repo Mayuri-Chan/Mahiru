@@ -1,4 +1,6 @@
+import asyncio
 from pyrogram import filters
+from pyrogram.errors import FloodWait
 
 async def owner_check(_, c, m):
     if m.sender_chat:
