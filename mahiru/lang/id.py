@@ -89,4 +89,20 @@ Menambahkan karakter ke dalam daftar waifumu.
 > `/trade <nomor waifumu> <nomor waifunya>`
 Menukar waifu dengan pengguna lain.
     """,
+    'whatanime': "What Anime",
+    'whatanime_help': """
+[What Anime]
+Module untuk mencari judul anime dari gambar/video.
+
+> `/whatanime`
+Mencari judul anime.
+    """,
+    'whatanime_reply_to_message': "Anda harus membalas pesan gambar/gif/video",
+    'downloading': "Mengunduh...",
+    'file_not_supported': "Format file tidak didukung! ({})",
+    'searching': "Mencari...",
+    'result_not_found': "Hasil tidak ditemukan...",
+    'similarity': "Kesamaan",
+    'whatanime_at': "Di menit",
+    'cannot_send_preview': "`Tidak bisa mengirim preview.`\n{}"
 }

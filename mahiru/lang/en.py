@@ -89,5 +89,21 @@ Add a character to your harem.
 
 > `/trade <your waifu number> <their waifu number>`
 Trade waifus with other users.
-    """
+    """,
+    'whatanime': "What Anime",
+    'whatanime_help': """
+[What Anime]
+Find anime from photo/gif/video.
+
+> `/whatanime`
+Reply to a photo/gif/video to find the anime.
+    """,
+    'whatanime_reply_to_message': "You must reply to a photo/gif/video!",
+    'downloading': "Downloading...",
+    'file_not_supported': "File format not supported! ({})",
+    'searching': "Searching...",
+    'result_not_found': "Result not found...",
+    'similarity': "Similarity",
+    'whatanime_at': "At",
+    'cannot_send_preview': "`Cannot send preview.`\n{}"
 }

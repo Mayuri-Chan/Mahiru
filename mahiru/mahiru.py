@@ -1,5 +1,6 @@
 import asyncio
 import colorlog
+import httpx
 import importlib
 import logging
 import time
@@ -40,6 +41,7 @@ class Mahiru(Client):
         self.db = conn["mahiru"]
         self.log = log
         self.scheduler = AsyncScheduler()
+        self.fetch = httpx.AsyncClient(http2=True)
 
     async def start(self):
         self._setup_log()
