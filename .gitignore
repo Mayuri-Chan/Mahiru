@@ -15,6 +15,7 @@ dist/
 *.session-journal
 *.session-wal
 downloads/
+requirements.txt
 
 # IDE specific files
 .idea/
