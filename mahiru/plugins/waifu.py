@@ -38,7 +38,7 @@ async def message_watcher(c, m):
         if check['active'] == True:
             if m.command and m.command[0] == "protecc":
                 return
-            if check['message_count'] >= 10 or check_active['timeout'] < time():
+            if check['message_count'] >= 10 or (check_active and check_active['timeout'] < time()):
                 await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': False}})
                 await adb.delete_one({'chat_id': m.chat.id})
                 return await c.send_message(m.chat.id, await c.tl(m.chat.id, 'waifu_running'))

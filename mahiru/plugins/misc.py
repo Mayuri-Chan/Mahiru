@@ -3,6 +3,7 @@ import re
 from mahiru import HELP_COMMANDS, PREFIX
 from mahiru.lang import list_all_lang
 from mahiru.mahiru import Mahiru
+from mahiru.util.filters import admin_only
 from mahiru.util.misc import paginate_plugins
 from pyrogram import enums, filters, __version__
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -109,7 +110,7 @@ async def help_button(c, q):
             reply_markup=InlineKeyboardMarkup(await paginate_plugins(c, 0, HELP_COMMANDS, "help", chat_id)))
 
 
-@Mahiru.on_message(filters.command("setlang", PREFIX) | filters.command("lang", PREFIX))
+@Mahiru.on_message((filters.command("setlang", PREFIX) | filters.command("lang", PREFIX)) & admin_only)
 async def set_language(c,m):
     db = c.db["chat_settings"]
     chat_id = m.chat.id

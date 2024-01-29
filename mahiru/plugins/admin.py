@@ -12,9 +12,11 @@ __HELP__ = "admin_help"
 @Mahiru.on_message(filters.group, group=1)
 async def chat_watcher(c,m):
     db = c.db["chat_list"]
+    adb = c.db["admin_list"]
     chat_id = m.chat.id
     check = await db.find_one({'chat_id': chat_id})
-    if not check:
+    check_admin_db = await adb.find_one({'chat_id': chat_id})
+    if not check or not check_admin_db:
         await admincache(c,m, True)
     await db.update_one({'chat_id': chat_id},{"$set": {'chat_username': m.chat.username, 'chat_name': m.chat.title}}, upsert=True)
 
