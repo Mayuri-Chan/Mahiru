@@ -105,5 +105,6 @@ Reply to a photo/gif/video to find the anime.
     'result_not_found': "Result not found...",
     'similarity': "Similarity",
     'whatanime_at': "At",
-    'cannot_send_preview': "`Cannot send preview.`\n{}"
+    'cannot_send_preview': "`Cannot send preview.`\n{}",
+    'waifu_not_found': "Could not find `{}` in waifu database!",
 }

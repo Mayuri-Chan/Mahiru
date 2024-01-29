@@ -104,5 +104,6 @@ Mencari judul anime.
     'result_not_found': "Hasil tidak ditemukan...",
     'similarity': "Kesamaan",
     'whatanime_at': "Di menit",
-    'cannot_send_preview': "`Tidak bisa mengirim preview.`\n{}"
+    'cannot_send_preview': "`Tidak bisa mengirim preview.`\n{}",
+    'waifu_not_found': "Tidak dapat menemukan `{}` di database waifu!",
 }

@@ -654,3 +654,39 @@ async def decline_trade(c,q):
         return await q.answer((await c.tl(q.message.chat.id, 'not_your_trade')))
     await db.delete_one({'trade_id': trade_id})
     await q.message.edit_text((await c.tl(q.message.chat.id, 'trade_declined')))
+
+@Mahiru.on_message(filters.command("test_waifu", PREFIX) & sudo_only)
+async def cmd_test_waifu(c,m):
+    db = c.db["chat_waifu"]
+    adb = c.db["active_waifu"]
+    cdb = c.db["char_list"]
+    text = m.text.split(None, 1)
+    if len(text) > 1:
+        char = text[1]
+        data = {}
+        chara_data = None
+        async for anime_data in cdb.find():
+            for char_data in anime_data['characters']:
+                if char.lower() in char_data['name'].lower():
+                    data['anime'] = anime_data['title']
+                    chara_data = char_data
+                    break
+                for alias in char_data['alias']:
+                    if char.lower() in alias.lower():
+                        data['anime'] = anime_data['title']
+                        chara_data = char_data
+                        break
+            if chara_data is not None:
+                break
+        if chara_data is None:
+            return await m.reply_text((await c.tl(m.chat.id, 'waifu_not_found')).format(char))
+        data['char'] = chara_data['name']
+        data['image'] = chara_data['image']
+        data['alias'] = chara_data['alias']
+    else:
+        data = await get_random_waifu(c)
+    await db.update_one({'chat_id': m.chat.id}, {'$set': {'message_count': 0, 'active': True}})
+    text = await c.tl(m.chat.id, 'new_waifu')
+    timeout = time() + (60*5) # 5 minutes
+    await adb.update_one({'chat_id': m.chat.id}, {'$set': {'anime': data['anime'], 'char': data['char'], 'alias': data["alias"], 'timeout': timeout}}, upsert=True)
+    return await c.send_photo(m.chat.id, photo=data['image'], caption=text)
